@@ -1,8 +1,8 @@
 # 微学堂
 
-**项目简介：**微学堂是一个前后端分离的多用户论坛项目，实现了用户注册、登录、发帖、评论、私信、点赞、关注、搜索、记录日志、敏感词过滤等功能。
+**项目简介**：微学堂是一个前后端分离的多用户论坛项目，实现了用户注册、登录、发帖、评论、私信、点赞、关注、搜索、记录日志、敏感词过滤等功能。
 
-**技术栈：**Spring Boot + MyBatis + Redis + Spring Security + RabbitMQ + Elasticsearch 
+**技术栈**：Spring Boot + MyBatis + Redis + Spring Security + RabbitMQ + Elasticsearch 
 
 **主要设计**：
 
