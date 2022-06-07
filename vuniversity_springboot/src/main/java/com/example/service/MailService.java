@@ -7,7 +7,7 @@ public interface MailService {
      * @param mail
      * @return
      */
-    public boolean isMailExist(String mail);
+    boolean isMailExist(String mail);
 
     /**
      * 发送注册验证码
@@ -15,5 +15,5 @@ public interface MailService {
      * @param to 收件人邮箱
      * @return 返回true一切正常，false表示邮箱已被注册或者邮箱格式不合法
      */
-    public boolean sendMail(String to) throws Exception;
+    boolean sendMail(String to) throws Exception;
 }

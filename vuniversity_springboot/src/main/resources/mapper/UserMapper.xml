@@ -7,12 +7,41 @@
     <sql id="selectFields">
         id, username, password, email, avatar, state, register_time
     </sql>
+    <sql id="insertFields">
+        username, password, email, avatar, state, register_time
+    </sql>
 
 
     <select id="getUserById" resultType="com.example.entity.User">
-        select <include refid="selectFields"></include>
+        select
+        <include refid="selectFields"></include>
         from user
         where id=#{userId}
     </select>
+
+    <!-- 根据用户名查询用户信息 -->
+    <select id="getUserByName" resultType="com.example.entity.User">
+        select
+        <include refid="selectFields"></include>
+        from user
+        where username=#{userName}
+    </select>
+
+    <!-- 插入用户 -->
+    <insert id="insertUser">
+        insert into user(<include refid="insertFields"></include>)
+        values (#{username},#{password},#{email},#{avatar},#{state},#{registerTime})
+    </insert>
+
+    <!-- 根据用户id，获取用户角色列表 -->
+    <select id="getRolesByUserId" resultType="com.example.entity.Role">
+    select id,role_name,role_name_zh
+    from role
+    where id in (
+        select role_id
+        from user_role
+        where user_id = #{userId}
+    )
+</select>
 
 </mapper>
