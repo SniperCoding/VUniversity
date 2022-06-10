@@ -9,9 +9,15 @@
         id, user_id, title, content, comment_count,score ,type, state, create_time, update_time
     </sql>
 
+    <sql id="insertFields">
+        user_id, title, content, comment_count,score ,type, state, create_time, update_time
+    </sql>
+
+
     <!--查询所有帖子-->
     <select id="findAll" resultType="com.example.entity.Post">
-        select <include refid="selectFields"></include>
+        select
+        <include refid="selectFields"></include>
         from post
         where state != 2
         <if test="userId!=0">
@@ -34,4 +40,32 @@
             and user_id = #{userId}
         </if>
     </select>
+
+    <!-- 插入一条帖子 -->
+    <insert id="insertPost" keyProperty="id">
+        insert into post(<include refid="insertFields"></include>)
+        values (#{userId},#{title},#{content},#{commentCount},#{score},#{type},#{state},#{createTime},#{updateTime})
+    </insert>
+
+    <!-- 根据id查询帖子 -->
+    <select id="getPostById" resultType="com.example.entity.Post">
+        select
+        <include refid="selectFields"></include>
+        from post
+        where state != 2 and id = #{id}
+    </select>
+
+    <!-- 修改帖子 -->
+    <update id="updatePost">
+        update post
+        set title = #{title},content=#{content},update_time=#{updateTime}
+        where id=#{id}
+    </update>
+
+    <!-- 删除帖子 -->
+    <delete id="delete">
+        delete from post
+        where id=#{id}
+    </delete>
+
 </mapper>

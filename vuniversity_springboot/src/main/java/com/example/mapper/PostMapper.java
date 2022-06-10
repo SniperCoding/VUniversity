@@ -20,4 +20,32 @@ public interface PostMapper {
      * @return
      */
     int getPostCount(int userId);
+
+    /**
+     * 插入一条帖子
+     * @param post
+     * @return
+     */
+    int insertPost(Post post);
+
+    /**
+     * 根据id查询帖子
+     * @param id
+     * @return
+     */
+    Post getPostById(int id);
+
+    /**
+     * 修改帖子
+     * @param post
+     * @return
+     */
+    int updatePost(Post post);
+
+    /**
+     * 删除帖子
+     * @param id
+     * @return
+     */
+    int delete(int id);
 }
