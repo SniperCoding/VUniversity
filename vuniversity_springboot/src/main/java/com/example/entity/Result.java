@@ -41,7 +41,7 @@ public class Result {
      * @return
      */
     public static Result error() {
-        return new Result(500, "失败！", null);
+        return new Result(400, "失败！", null);
     }
 
     /**

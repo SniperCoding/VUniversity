@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.MessageMapper">
+
+    <sql id="selectFields">
+        id, from_user_id, to_user_id, conversation_id, content,state, create_time
+    </sql>
+
+    <sql id="updateFields">
+        from_user_id, to_user_id, conversation_id, content, state, create_time
+    </sql>
+
+    <!-- 查询用户的全部会话列表，并且每个会话只返回一条最新的私信 -->
+    <select id="getConversations" resultType="com.example.entity.Message">
+        select <include refid="selectFields"></include>
+        from message
+        where id in (
+        select max(id) from message
+        where (from_user_id = #{userId} or to_user_id = #{userId}) and state!=2
+        group by conversation_id
+        )
+        order by id desc
+    </select>
+
+    <!-- 获取一个会话中的所有消息 -->
+    <select id="getAllMessageCount" resultType="java.lang.Integer">
+        select count(*)
+        from message
+        where conversation_id = #{conversationId} and state!=2
+    </select>
+
+    <!-- 获取会话中的未读消息，如果传入的conversationId为null，则查询所有未读消息 -->
+    <select id="getUnreadMessageCount" resultType="java.lang.Integer">
+        select count(*)
+        from message
+        where to_user_id = #{toUserId}
+        and state=0
+        <if test="conversationId!=null">
+            and conversation_id = #{conversationId}
+        </if>
+    </select>
+
+    <!-- 根据会话id获取到会话中的所有消息 -->
+    <select id="getAllMessagesByConversationId" resultType="com.example.entity.Message">
+        select
+        <include refid="selectFields"></include>
+        from message
+        where conversation_id = #{conversationId} and state!=2
+    </select>
+
+    <!-- 修改消息的状态 -->
+    <update id="updateMessageState">
+        update message
+        set state = #{state}
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 增加一条消息 -->
+    <insert id="insertMessage">
+        insert into message(<include refid="updateFields"></include>)
+        values( #{fromUserId},#{toUserId},#{conversationId},#{content},#{state},#{createTime})
+    </insert>
+</mapper>
