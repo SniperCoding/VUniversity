@@ -150,4 +150,9 @@ public class PostServiceImpl implements PostService {
         }
         return postMapper.delete(id);
     }
+
+    @Override
+    public void updateCommentCount(int id, int commentCount) {
+        postMapper.updateCommentCount(id, commentCount);
+    }
 }

@@ -61,4 +61,11 @@ public interface PostService {
      * @return
      */
     int delete(int id);
+
+    /**
+     *  更新评论数量
+     * @param id
+     * @param commentCount
+     */
+    void updateCommentCount(int id,int commentCount);
 }

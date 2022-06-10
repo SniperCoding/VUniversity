@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.CommentMapper">
+
+    <sql id="selectFields">
+        id, from_user_id, to_user_id, content, level, parent_id, state, create_time
+    </sql>
+    <sql id="insertFields">
+        from_user_id, to_user_id, content, level, parent_id, state, create_time
+    </sql>
+
+    <!-- 查询所有评论 -->
+    <select id="getAllComments" resultType="com.example.entity.Comment">
+        select <include refid="selectFields"></include>
+        from comment
+        where state=0 and level=#{level} and parent_id=#{parentId}
+        order by create_time
+    </select>
+
+    <!-- 插入一条评论 -->
+    <insert id="insertComment">
+        insert into comment(<include refid="insertFields"></include>)
+        values(#{fromUserId},#{toUserId},#{content},#{level},#{parentId},#{state},#{createTime})
+    </insert>
+</mapper>

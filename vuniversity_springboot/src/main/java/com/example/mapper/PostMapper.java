@@ -48,4 +48,12 @@ public interface PostMapper {
      * @return
      */
     int delete(int id);
+
+    /**
+     * 更新评论数量
+     * @param id
+     * @param comment_count
+     * @return
+     */
+    int updateCommentCount(int id,int comment_count);
 }

@@ -68,4 +68,11 @@
         where id=#{id}
     </delete>
 
+    <!-- 更新评论数量 -->
+    <update id="updateCommentCount">
+        update post
+        set comment_count= #{commentCount}
+        where id=#{id};
+    </update>
+
 </mapper>
