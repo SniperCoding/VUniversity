@@ -47,7 +47,7 @@ public class MailUtil {
      */
     public String sendHtmlMail(String to) throws Exception {
         String code = randomString();
-        String content = "您的注册验证码为：" + code + ",五分钟内有效，请勿泄漏！";
+        String content = "您的注册验证码为：" + code + "，五分钟内有效，请勿泄漏！";
         sendHtmlMail(to, "VUniversity邮箱验证码", content);
         return code;
     }

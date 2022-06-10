@@ -35,13 +35,34 @@
 
     <!-- 根据用户id，获取用户角色列表 -->
     <select id="getRolesByUserId" resultType="com.example.entity.Role">
-    select id,role_name,role_name_zh
-    from role
-    where id in (
-        select role_id
-        from user_role
-        where user_id = #{userId}
-    )
-</select>
+        select id,role_name,role_name_zh
+        from role
+        where id in (
+            select role_id
+            from user_role
+            where user_id = #{userId}
+        )
+    </select>
+
+    <!-- 更新密码 -->
+    <update id="updatePassword">
+        update user
+        set password=#{newPassword}
+        where id=#{userId}
+    </update>
+
+    <!-- 更新头像 -->
+    <update id="updateAvatar">
+        update user
+        set avatar=#{newAvatar}
+        where id=#{userId}
+    </update>
+
+    <!-- 更新用户状态 -->
+    <update id="updateState">
+        update user
+        set state=#{state}
+        where id=#{userId}
+    </update>
 
 </mapper>

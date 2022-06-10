@@ -82,7 +82,7 @@ public class JwtTokenUtil {
     }
 
     /**
-     * 验证 token 是否失效
+     * 验证 token 是否过期
      * @param token
      * @return
      */
@@ -90,7 +90,7 @@ public class JwtTokenUtil {
         try {
             getClaimsFormToken(token);  // 根据 token 获取荷载
             return false;
-        } catch (ExpiredJwtException e) {  // 失效会抛出此异常
+        } catch (ExpiredJwtException e) {  // 过期会抛出此异常
             return true;
         } catch (Exception e){
             return false;

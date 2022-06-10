@@ -109,4 +109,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         user.setRoles(roles);
         return user;
     }
+
+    @Override
+    public int updatePassword(int userId, String newPassword) {
+        // 密码加密
+        return userMapper.updatePassword(userId, new BCryptPasswordEncoder().encode(newPassword));
+    }
+
+    @Override
+    public int updateAvatar(int userId, String newAvatar) {
+        return userMapper.updateAvatar(userId, newAvatar);
+    }
+
+    @Override
+    public int updateState(int userId, int state) {
+        return userMapper.updateState(userId, state);
+    }
 }

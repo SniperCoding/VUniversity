@@ -45,4 +45,31 @@ public interface UserService {
      * @return
      */
     Result getNewTokenByRefreshToken(String token);
+
+    /**
+     * 根据id修改密码
+     *
+     * @param userId
+     * @param newPassword
+     * @return
+     */
+    int updatePassword(int userId, String newPassword);
+
+    /**
+     * 根据id修改头像
+     *
+     * @param userId
+     * @param newAvatar
+     * @return
+     */
+    int updateAvatar(int userId, String newAvatar);
+
+    /**
+     * 根据id修改用户状态
+     *
+     * @param userId
+     * @param state
+     * @return
+     */
+    int updateState(int userId, int state);
 }

@@ -16,19 +16,14 @@ public class MailController {
 
     @ApiOperation("注册验证码")
     @GetMapping("/registerCode")
-    public Result getRegisterCode(@RequestParam() String mail){
+    public Result getRegisterCode(@RequestParam() String mail) {
         boolean isMailExist;
         try {
             isMailExist = mailService.sendMail(mail);  // 抛出异常说明用户邮箱不可用
         } catch (Exception e) {
-            e.printStackTrace();
-            return Result.error(400,"邮箱不正确或不可用！");
+            return Result.error(400, "邮箱不正确或不可用！");
         }
         // 如果邮箱不合法已被注册
-        if(isMailExist){
-            return Result.error(400,"邮箱格式不合法或已被注册！");
-        }else{
-            return Result.ok();
-        }
+        return isMailExist ? Result.error(400, "邮箱格式不合法或已被注册！") : Result.ok();
     }
 }
