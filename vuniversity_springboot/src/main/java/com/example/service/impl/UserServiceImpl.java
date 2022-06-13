@@ -7,6 +7,7 @@ import com.example.entity.param.RegisterParam;
 import com.example.entity.vo.KaptchaCodeVO;
 import com.example.entity.vo.UserVO;
 import com.example.mapper.UserMapper;
+import com.example.service.LikeService;
 import com.example.service.UserService;
 import com.example.util.JwtTokenUtil;
 import com.example.util.RedisKeyUtil;
@@ -45,6 +46,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired
     private Producer captchaProducerMath;
 
+    @Autowired
+    private LikeService likeService;
+
     @Value("${jwt.expiration}")
     private Long expiration; // token过期时间
 
@@ -54,6 +58,20 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public User getUserById(int userId) {
         return userMapper.getUserById(userId);
+    }
+
+    @Override
+    public UserVO getUserVOById(int userId) {
+        // 1.获取用户信息
+        User user = getUserById(userId);
+        // 2.获取用户点赞数量
+        long likeCount = likeService.getUserLikeCount(userId);
+        // 3.封装信息
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user,userVO);
+        userVO.setLikeCount((int) likeCount);
+        // 4.返回结果
+        return userVO;
     }
 
     @Override
@@ -100,13 +118,6 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         return Result.ok(map);
     }
 
-    @Override
-    public UserVO getUserVOById(int userId) {
-        User user = getUserById(userId);
-        UserVO userVO = new UserVO();
-        BeanUtils.copyProperties(user, userVO);
-        return userVO;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

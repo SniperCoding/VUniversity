@@ -8,6 +8,7 @@ import com.example.entity.vo.CommentVO;
 import com.example.entity.vo.PostUserVO;
 import com.example.mapper.CommentMapper;
 import com.example.service.CommentService;
+import com.example.service.LikeService;
 import com.example.service.PostService;
 import com.example.service.UserService;
 import com.example.util.ConstantUtil;
@@ -34,6 +35,8 @@ public class CommentServiceImpl implements CommentService {
     private SensitiveFilterUtil sensitiveFilterUtil;
     @Autowired
     private PostService postService;
+    @Autowired
+    private LikeService likeService;
 
     @Override
     public List<CommentVO> getAllComments(CommentPageParam commentPageParam) {
@@ -52,23 +55,33 @@ public class CommentServiceImpl implements CommentService {
         List<Comment> comments = commentMapper.getAllComments(commentLevel,parentId);
         // 4.封装查询结果
         List<CommentVO> commentVOs = new ArrayList<>();
+        Object currentUser = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         // 遍历所有评论，并获取评论的用户信息
         if (comments != null) {
             for (Comment comment : comments) {
                 CommentVO commentVO = new CommentVO();
-                // 复制属性
+                // 4.1 复制属性
                 BeanUtils.copyProperties(comment, commentVO);
-                // 获取评论者信息
+                // 4.2 获取评论者信息
                 User user = userService.getUserById(comment.getFromUserId());
                 commentVO.setAvatar(user.getAvatar());
                 commentVO.setUsername(user.getUsername());
-                // 获取被评论者信息,如果为0，说明是对层主做的评论，则不处理，否则是对其他人做的评论
+                commentVO.setUserId(user.getId());
+                // 4.3 获取被评论者信息,如果为0，说明是对层主做的评论，则不处理，否则是对其他人做的评论
                 if (comment.getToUserId() != 0) {
                     User toUser = userService.getUserById(comment.getToUserId());
                     commentVO.setToUsername(toUser.getUsername());
                 }
-                // 如果当前是一级评论，则需要查询其子评论，即二级评论
-                if(commentLevel== ConstantUtil.COMMENT_LEVEL_1){
+                // 4.4 获取评论点赞量
+                long commentLikeCount = likeService.getPostOrCommentLikeCount(1, comment.getId());
+                commentVO.setLikeCount((int) commentLikeCount);
+                // 4.5 查看当前用户是否对用户进行了点赞
+                if(currentUser instanceof User){
+                    boolean like = likeService.isLike(((User)currentUser).getId(), 1, comment.getId());
+                    commentVO.setLikeState(like);
+                }
+                // 4.6 如果当前是一级评论，则需要查询其子评论，即二级评论
+                if(commentLevel==ConstantUtil.COMMENT_LEVEL_1){
                     // 默认查第一页
                     CommentPageParam pageParam = new CommentPageParam(0,pageSize,ConstantUtil.COMMENT_LEVEL_2,comment.getId());
                     commentVO.setChildren( getAllComments(pageParam));
