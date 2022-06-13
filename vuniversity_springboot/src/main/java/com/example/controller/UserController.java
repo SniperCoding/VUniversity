@@ -4,6 +4,7 @@ import com.example.entity.Result;
 import com.example.entity.User;
 import com.example.entity.param.PasswordParam;
 import com.example.entity.param.RegisterParam;
+import com.example.entity.vo.KaptchaCodeVO;
 import com.example.entity.vo.UserVO;
 import com.example.handle.GlobalException;
 import com.example.service.UserService;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -116,5 +118,12 @@ public class UserController {
             return Result.error(400, "用户不存在！");
         }
         return Result.ok(userVO);
+    }
+
+    @ApiOperation("获取登录验证码")
+    @GetMapping("/kaptchaCode")
+    public Result getKaptchaCode() {
+        KaptchaCodeVO result = userService.getKaptchaCode();
+        return result == null ? Result.error(400, "获取验证码失败！") : Result.ok(result);
     }
 }

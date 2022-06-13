@@ -3,7 +3,10 @@ package com.example.service;
 import com.example.entity.Result;
 import com.example.entity.User;
 import com.example.entity.param.RegisterParam;
+import com.example.entity.vo.KaptchaCodeVO;
 import com.example.entity.vo.UserVO;
+
+import java.util.Map;
 
 public interface UserService {
     /**
@@ -72,4 +75,11 @@ public interface UserService {
      * @return
      */
     int updateState(int userId, int state);
+
+
+    /**
+     * 获取登录验证码
+     * @return 存放有图片的base64编码以及验证码的key
+     */
+    KaptchaCodeVO getKaptchaCode();
 }

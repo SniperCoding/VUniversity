@@ -24,11 +24,10 @@ import java.util.List;
 
 @Component
 public class Swagger4SpringSecurityApisUtil implements ApiListingScannerPlugin {
-
     @Override
     public List<ApiDescription> apply(DocumentationContext documentationContext) {
         // 登录接口
-        //1.定义参数
+        // 1.定义参数
         Parameter username = new ParameterBuilder()
                 .name("username")
                 .description("用户名")
@@ -47,7 +46,28 @@ public class Swagger4SpringSecurityApisUtil implements ApiListingScannerPlugin {
                 .required(true)
                 .defaultValue("123")
                 .build();
-        //2.接口的每种请求方式(GET/POST...)为一个 Operation
+
+        Parameter code = new ParameterBuilder()
+                .name("code")
+                .description("验证码")
+                .type(new TypeResolver().resolve(String.class))
+                .modelRef(new ModelRef("string"))
+                .parameterType("form")
+                .required(true)
+                .defaultValue("123")
+                .build();
+
+        Parameter verifyKey = new ParameterBuilder()
+                .name("verifyKey")
+                .description("验证key")
+                .type(new TypeResolver().resolve(String.class))
+                .modelRef(new ModelRef("string"))
+                .parameterType("form")
+                .required(true)
+                .defaultValue("123")
+                .build();
+
+        // 2.接口的每种请求方式(GET/POST...)为一个 Operation
         Operation loginOperation = new OperationBuilder(new CachingOperationNameGenerator())
                 .method(HttpMethod.POST)
                 .summary("登录")
@@ -55,7 +75,7 @@ public class Swagger4SpringSecurityApisUtil implements ApiListingScannerPlugin {
                 .responseMessages(Sets.newHashSet(new ResponseMessageBuilder().code(200).message("OK").build()))
                 .consumes(Sets.newHashSet(MediaType.MULTIPART_FORM_DATA_VALUE))
                 .produces(Sets.newHashSet(MediaType.APPLICATION_JSON_VALUE))
-                .parameters(Arrays.asList(username, password))
+                .parameters(Arrays.asList(username, password,code,verifyKey))
                 .build();
         //3.每个接口路径对应一个 ApiDescription
         ApiDescription loginDesc = new ApiDescription(null, "/login", "登录", Arrays.asList(loginOperation), false);

@@ -1,8 +1,11 @@
 package com.example.util;
 
+import java.util.UUID;
+
 public class RedisKeyUtil {
     private static final String PREFIX_MAIL_REGISTER_CODE = "mail:register:code:";  // 邮箱验证码前缀
     private static final String PREFIX_INSERT_POST_TOKEN = "insert:post:token:";   // 添加文章，获取token令牌
+    private static final String PREFIX_KAPTCHA_CODE ="kaptcha:code:";  // 邮箱验证码前缀
 
     /**
      * 获取Redis中存放注册验证码的键
@@ -22,5 +25,13 @@ public class RedisKeyUtil {
      */
     public static String getInsertPostToken(String uuid) {
         return PREFIX_INSERT_POST_TOKEN + uuid;
+    }
+
+    /**
+     * 获取Redis中存放登录验证码的键，形式为 kaptcha:code:UUID
+     * @return
+     */
+    public static String getKaptchaCode(){
+        return PREFIX_KAPTCHA_CODE  + UUID.randomUUID();
     }
 }

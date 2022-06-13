@@ -4,11 +4,13 @@ import com.example.entity.Result;
 import com.example.entity.Role;
 import com.example.entity.User;
 import com.example.entity.param.RegisterParam;
+import com.example.entity.vo.KaptchaCodeVO;
 import com.example.entity.vo.UserVO;
 import com.example.mapper.UserMapper;
 import com.example.service.UserService;
 import com.example.util.JwtTokenUtil;
 import com.example.util.RedisKeyUtil;
+import com.google.code.kaptcha.Producer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,8 +21,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.FastByteArrayOutputStream;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class UserServiceImpl implements UserService, UserDetailsService {
@@ -33,6 +40,10 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
+
+    // 数学表达式验证码
+    @Autowired
+    private Producer captchaProducerMath;
 
     @Value("${jwt.expiration}")
     private Long expiration; // token过期时间
@@ -124,5 +135,28 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     public int updateState(int userId, int state) {
         return userMapper.updateState(userId, state);
+    }
+
+
+    @Override
+    public KaptchaCodeVO getKaptchaCode() {
+        // 1.生成验证码存放在Redis中的key
+        String verifyKey = RedisKeyUtil.getKaptchaCode();  // 验证码结果在reids中对应的key
+        // 2.生成验证码
+        String capText = captchaProducerMath.createText(); // 生产验证码【数学表达式@计算结果】
+        String capStr = capText.substring(0, capText.lastIndexOf("@")); // 获取数学表达式
+        String code = capText.substring(capText.lastIndexOf("@") + 1); // 获取结果
+        BufferedImage image = captchaProducerMath.createImage(capStr); // 使用生成的验证码字符串返回一个BufferedImage对象
+        // 3.将验证码存放到redis中，2分钟后过期
+        redisTemplate.opsForValue().set(verifyKey, code, 2, TimeUnit.MINUTES);
+        // 4.将转换流信息写出
+        FastByteArrayOutputStream os = new FastByteArrayOutputStream(); // ByteArrayOutputStream类是在创建它的实例时，程序内部创建一个byte型别数组的缓冲区
+        try {
+            ImageIO.write(image, "jpg", os);  // 将BufferedImage对象直接写出指定输出流
+        } catch (IOException e) {
+            return null;
+        }
+        // 5.将结果封装到KaptchaCodeVO中返回（图片以base64进行编码）
+        return new KaptchaCodeVO(verifyKey, "data:image/jpg;base64," + Base64.getEncoder().encodeToString(os.toByteArray()));
     }
 }
