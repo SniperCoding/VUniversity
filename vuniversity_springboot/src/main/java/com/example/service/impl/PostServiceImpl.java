@@ -8,6 +8,7 @@ import com.example.entity.param.PostParam;
 import com.example.entity.vo.PostUserVO;
 import com.example.handle.GlobalException;
 import com.example.mapper.PostMapper;
+import com.example.rabbitmq.RabbitmqConstant;
 import com.example.service.ElasticSearchService;
 import com.example.service.LikeService;
 import com.example.service.PostService;
@@ -15,6 +16,7 @@ import com.example.service.UserService;
 import com.example.util.RedisKeyUtil;
 import com.example.util.SensitiveFilterUtil;
 import com.github.pagehelper.PageHelper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -43,6 +45,8 @@ public class PostServiceImpl implements PostService {
     private LikeService likeService;
     @Autowired
     private ElasticSearchService elasticSearchService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public List<PostUserVO> findAll(PostPageParam postPageParam) {
@@ -115,8 +119,8 @@ public class PostServiceImpl implements PostService {
         // 5.插入帖子
         int result = postMapper.insertPost(post);
         // 6.插入到es中
-        // TODO：使用MQ异步更好
-        elasticSearchService.savePost(post);
+//        elasticSearchService.savePost(post);
+        rabbitTemplate.convertAndSend(RabbitmqConstant.POST_INSERT_EXCHANGE, RabbitmqConstant.POST_INSERT_KEY, post);
         return result > 0;
     }
 
@@ -166,8 +170,8 @@ public class PostServiceImpl implements PostService {
         // 更新数据库
         int result = postMapper.updatePost(post);
         // 更新es
-        // TODO：使用MQ异步更好
-        elasticSearchService.savePost(post);
+//        elasticSearchService.savePost(post);
+        rabbitTemplate.convertAndSend(RabbitmqConstant.POST_INSERT_EXCHANGE, RabbitmqConstant.POST_INSERT_KEY, post);
         return result;
     }
 
@@ -190,8 +194,9 @@ public class PostServiceImpl implements PostService {
         // 从数据库中删除
         int deleteId = postMapper.delete(id);
         // 从es中删除
-        // TODO：使用MQ异步更好
-        elasticSearchService.deletePost(id);
+//        elasticSearchService.deletePost(id);
+        rabbitTemplate.convertAndSend(RabbitmqConstant.POST_INSERT_EXCHANGE, RabbitmqConstant.POST_INSERT_KEY, id);
+
         return deleteId;
     }
 

@@ -1,17 +1,29 @@
 package com.example.service.impl;
 
+import com.example.entity.Notice;
+import com.example.rabbitmq.RabbitmqConstant;
 import com.example.service.LikeService;
+import com.example.service.NoticeService;
+import com.example.service.UserService;
+import com.example.util.ConstantUtil;
 import com.example.util.RedisKeyUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Date;
 
 @Service
 public class LikeServiceImpl implements LikeService {
 
     @Autowired
     private RedisTemplate redisTemplate;
+    //    @Autowired
+//    private NoticeService noticeService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     @Transactional
@@ -21,7 +33,7 @@ public class LikeServiceImpl implements LikeService {
         // 2.获取存储在Redis中对用户点赞的键
         String likeUserKey = RedisKeyUtil.getLikeUser(toUserId);
         // 2.判断是点赞还是取消赞（即判断点赞者id是否出现在likeKey的set集合中）
-        Boolean liked = redisTemplate.opsForSet().isMember(likeKey, fromUserId);
+        boolean liked = redisTemplate.opsForSet().isMember(likeKey, fromUserId);
         // 2.1 如果已经点赞过了，即取消点赞，则将点赞者id从set集合中取出，并将被点赞者的点赞数量减1
         if (liked) {
             redisTemplate.opsForSet().remove(likeKey, fromUserId);
@@ -29,6 +41,10 @@ public class LikeServiceImpl implements LikeService {
         } else {  // 2.2 如果点赞，则将点赞者id存放在set集合中，并将被点赞者的点赞数量加1
             redisTemplate.opsForSet().add(likeKey, fromUserId);
             redisTemplate.opsForValue().increment(likeUserKey);
+            // 发布系统通知
+            Notice notice = new Notice(null, ConstantUtil.NOTICE_LIKE, toUserId, fromUserId, null, ConstantUtil.Message_UNREAD, new Date());
+//            noticeService.saveNotice(notice);
+            rabbitTemplate.convertAndSend(RabbitmqConstant.NOTICE_EXCHANGE, RabbitmqConstant.NOTICE_KEY, notice);
         }
     }
 

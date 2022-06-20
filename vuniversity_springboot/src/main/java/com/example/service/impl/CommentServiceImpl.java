@@ -1,19 +1,19 @@
 package com.example.service.impl;
 
 import com.example.entity.Comment;
+import com.example.entity.Notice;
 import com.example.entity.User;
 import com.example.entity.param.CommentPageParam;
 import com.example.entity.param.CommentParam;
 import com.example.entity.vo.CommentVO;
 import com.example.entity.vo.PostUserVO;
 import com.example.mapper.CommentMapper;
-import com.example.service.CommentService;
-import com.example.service.LikeService;
-import com.example.service.PostService;
-import com.example.service.UserService;
+import com.example.rabbitmq.RabbitmqConstant;
+import com.example.service.*;
 import com.example.util.ConstantUtil;
 import com.example.util.SensitiveFilterUtil;
 import com.github.pagehelper.PageHelper;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -37,6 +37,10 @@ public class CommentServiceImpl implements CommentService {
     private PostService postService;
     @Autowired
     private LikeService likeService;
+//    @Autowired
+//    private NoticeService noticeService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public List<CommentVO> getAllComments(CommentPageParam commentPageParam) {
@@ -116,5 +120,9 @@ public class CommentServiceImpl implements CommentService {
             PostUserVO post = postService.getPostById((int) parentId);
             postService.updateCommentCount((int) parentId,post.getCommentCount()+1);
         }
+        // 发布系统通知
+        Notice notice = new Notice(null, ConstantUtil.NOTICE_COMMENT, comment.getToUserId(), comment.getFromUserId(), null, ConstantUtil.Message_UNREAD, new Date());
+//        noticeService.saveNotice(notice);
+        rabbitTemplate.convertAndSend(RabbitmqConstant.NOTICE_EXCHANGE, RabbitmqConstant.NOTICE_KEY, notice);
     }
 }

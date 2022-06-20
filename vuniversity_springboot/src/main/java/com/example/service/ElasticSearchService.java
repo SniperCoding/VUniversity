@@ -20,4 +20,10 @@ public interface ElasticSearchService {
      * @param post
      */
     void savePost(Post post);
+
+    /**
+     * 删除帖子
+     * @param id
+     */
+    void deletePost(Integer id);
 }

@@ -1,11 +1,17 @@
 package com.example.service.impl;
 
+import com.example.entity.Notice;
 import com.example.entity.Result;
 import com.example.entity.User;
 import com.example.entity.vo.FollowUserVO;
+import com.example.rabbitmq.RabbitmqConstant;
+import com.example.rabbitmq.RabbitmqListener;
 import com.example.service.FollowService;
+import com.example.service.NoticeService;
 import com.example.service.UserService;
+import com.example.util.ConstantUtil;
 import com.example.util.RedisKeyUtil;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +30,10 @@ public class FollowServiceImpl implements FollowService {
     private RedisTemplate redisTemplate;
     @Autowired
     private UserService userService;
+//    @Autowired
+//    private NoticeService noticeService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     @Transactional
@@ -40,7 +50,10 @@ public class FollowServiceImpl implements FollowService {
         String followerKey = RedisKeyUtil.getFollower(fromUserId);
         // 4 执行操作
         if (followed) {  // 已关注，现在是取关操作
-            // TODO 异步通知
+            // 发布系统通知
+            Notice notice = new Notice(null, ConstantUtil.NOTICE_FOLLOW, toUserId, fromUserId, null, ConstantUtil.Message_UNREAD, new Date());
+//            noticeService.saveNotice(notice);
+            rabbitTemplate.convertAndSend(RabbitmqConstant.NOTICE_EXCHANGE, RabbitmqConstant.NOTICE_KEY, notice);
             // 关注者少了一个关注用户
             redisTemplate.opsForZSet().remove(followeeKey, toUserId);
             // 被关注者少了一个粉丝
