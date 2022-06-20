@@ -7,6 +7,7 @@ import com.example.entity.param.RegisterParam;
 import com.example.entity.vo.KaptchaCodeVO;
 import com.example.entity.vo.UserVO;
 import com.example.mapper.UserMapper;
+import com.example.service.FollowService;
 import com.example.service.LikeService;
 import com.example.service.UserService;
 import com.example.util.JwtTokenUtil;
@@ -49,6 +50,9 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Autowired
     private LikeService likeService;
 
+    @Autowired
+    private FollowService followService;
+
     @Value("${jwt.expiration}")
     private Long expiration; // token过期时间
 
@@ -66,11 +70,17 @@ public class UserServiceImpl implements UserService, UserDetailsService {
         User user = getUserById(userId);
         // 2.获取用户点赞数量
         long likeCount = likeService.getUserLikeCount(userId);
-        // 3.封装信息
+        // 3.获取用户粉丝数量
+        long followerCount = followService.getFollowerCount(userId);
+        // 4.获取用户关注数量
+        long followeeCount = followService.getFolloweeCount(userId);
+        // 5.封装信息
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user,userVO);
         userVO.setLikeCount((int) likeCount);
-        // 4.返回结果
+        userVO.setFolloweeCount((int) followeeCount);
+        userVO.setFollowerCount((int) followerCount);
+        // 6.返回结果
         return userVO;
     }
 

@@ -9,6 +9,9 @@ public class RedisKeyUtil {
     private static final String PREFIX_LIKE_POST = "like:post:";   // 帖子的赞
     private static final String PREFIX_LIKE_COMMENT = "like:comment:";   // 评论的赞
     private static final String PREFIX_LIKE_USER = "like:user:";   // 用户的赞
+    private static final String PREFIX_FOLLOWEE = "followee:";   // 关注
+    private static final String PREFIX_FOLLOWER = "follower:";   // 粉丝（被关注）
+
     /**
      * 获取Redis中存放注册验证码的键
      *
@@ -65,5 +68,28 @@ public class RedisKeyUtil {
      */
     public static String getLikeUser(int userId) {
         return PREFIX_LIKE_USER + userId;
+    }
+
+
+    /**
+     * 获取Redis中存放用户关注的键，形式为 followee:用户id
+     * 值为一个 zset 集合，存放用户所关注人的id，按照时间排序
+     *
+     * @param userId
+     * @return
+     */
+    public static String getFollowee(int userId) {
+        return PREFIX_FOLLOWEE + userId;
+    }
+
+    /**
+     * 获取Redis中存放用户粉丝的键，形式为 follower:用户id
+     * 值为一个 zset 集合，存放用户粉丝的id，按照时间排序
+     *
+     * @param userId
+     * @return
+     */
+    public static String getFollower(int userId) {
+        return PREFIX_FOLLOWER + userId;
     }
 }
