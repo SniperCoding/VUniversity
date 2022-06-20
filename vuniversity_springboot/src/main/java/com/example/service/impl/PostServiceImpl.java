@@ -8,6 +8,7 @@ import com.example.entity.param.PostParam;
 import com.example.entity.vo.PostUserVO;
 import com.example.handle.GlobalException;
 import com.example.mapper.PostMapper;
+import com.example.service.ElasticSearchService;
 import com.example.service.LikeService;
 import com.example.service.PostService;
 import com.example.service.UserService;
@@ -40,6 +41,8 @@ public class PostServiceImpl implements PostService {
     private RedisTemplate redisTemplate;
     @Autowired
     private LikeService likeService;
+    @Autowired
+    private ElasticSearchService elasticSearchService;
 
     @Override
     public List<PostUserVO> findAll(PostPageParam postPageParam) {
@@ -111,6 +114,9 @@ public class PostServiceImpl implements PostService {
         Post post = new Post(null, user.getId(), title, content, 0, 0.0, 0, 0, new Date(), new Date());
         // 5.插入帖子
         int result = postMapper.insertPost(post);
+        // 6.插入到es中
+        // TODO：使用MQ异步更好
+        elasticSearchService.savePost(post);
         return result > 0;
     }
 
