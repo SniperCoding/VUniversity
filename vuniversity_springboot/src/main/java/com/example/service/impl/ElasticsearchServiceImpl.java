@@ -29,8 +29,6 @@ public class ElasticsearchServiceImpl implements ElasticSearchService {
 
     @Autowired
     private ElasticsearchRestTemplate elasticsearchRestTemplate;
-    @Autowired
-    private RestHighLevelClient client;
 
     @Override
     public Map<String, Object> search(SearchParam params) {
@@ -84,5 +82,10 @@ public class ElasticsearchServiceImpl implements ElasticSearchService {
                 .withObject(post)   // 指定文档
                 .build();
         elasticsearchRestTemplate.index(indexQuery, IndexCoordinates.of("post")); // 索引名
+    }
+
+    @Override
+    public void deletePost(Integer id) {
+        elasticsearchRestTemplate.delete(id.toString(), Post.class);
     }
 }

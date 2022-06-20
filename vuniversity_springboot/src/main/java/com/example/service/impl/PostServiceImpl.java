@@ -163,7 +163,12 @@ public class PostServiceImpl implements PostService {
         post.setContent(sensitiveFilterUtil.filterKeyword(post.getContent()));
         post.setTitle(sensitiveFilterUtil.filterKeyword(post.getTitle()));
         post.setUpdateTime(new Date());
-        return postMapper.updatePost(post);
+        // 更新数据库
+        int result = postMapper.updatePost(post);
+        // 更新es
+        // TODO：使用MQ异步更好
+        elasticSearchService.savePost(post);
+        return result;
     }
 
     @Override
@@ -182,7 +187,12 @@ public class PostServiceImpl implements PostService {
         if (!isAdmin && post != null && user.getId() != post.getUserId()) {
             throw new GlobalException("非法删除！");
         }
-        return postMapper.delete(id);
+        // 从数据库中删除
+        int deleteId = postMapper.delete(id);
+        // 从es中删除
+        // TODO：使用MQ异步更好
+        elasticSearchService.deletePost(id);
+        return deleteId;
     }
 
     @Override

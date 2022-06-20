@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.NoticeMapper">
+
+    <sql id="selectFields">
+        id, type, user_id, from_user_id, state, create_time
+    </sql>
+
+    <sql id="insertFields">
+        type, user_id, from_user_id, state, create_time
+    </sql>
+
+    <!-- 增加一条通知 -->
+    <insert id="insertNotice">
+        insert into notice(<include refid="insertFields"></include>)
+        values( #{type},#{UserId},#{fromUserId},#{state},#{createTime})
+    </insert>
+
+    <!-- 修改通知的状态 -->
+    <update id="updateNoticeState">
+        update notice
+        set state = #{state}
+        where id in
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!--查询用户点赞/评论/关注下最新的通知 -->
+    <select id="getLatestNotice" resultType="com.example.entity.Notice">
+        select <include refid="selectFields"></include>
+        from notice
+        where id in(
+        select max(id)
+        from notice
+        where user_id=#{userId} and type=#{type} and status!=2
+        )
+    </select>
+
+    <!-- 查询用户点赞/评论/关注下通知数量 -->
+    <select id="getNoticeCount" resultType="java.lang.Integer">
+        select count(*)
+        from notice
+        where user_id=#{userId} and type=#{type} and state!=2
+    </select>
+
+    <!-- 查询未读通知的消息数量（如果不传入type，则查询所有通知的未读数量） -->
+    <select id="getNoticeUnreadCount" resultType="java.lang.Integer">
+        select count(*)
+        from notice
+        where user_id=#{userId} and status =0
+        <if test="type!=-1">
+            and type=#{type}
+        </if>
+    </select>
+
+    <!-- 查询用户点赞/评论/关注下的通知列表 -->
+    <select id="getAllNotices" resultType="com.example.entity.Notice">
+        selecti<include refid="selectFields"></include>
+        from notice
+        where user_id=#{userId} and type=#{type} and state!=2
+    </select>
+</mapper>

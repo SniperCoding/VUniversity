@@ -21,7 +21,6 @@ public class Notice {
     // 点赞/评论/关注此用户的用户id
     private Integer fromUserId;
     // 点赞/评论/关注此用户的用户信息（不存数据库）
-    // TODO 应该新建一个类吧，封装notice和UserVo
     private UserVO fromUser;
     // 状态：0未读/1已读/2删除
     private Integer state;

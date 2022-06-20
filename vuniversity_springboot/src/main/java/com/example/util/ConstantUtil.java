@@ -25,4 +25,19 @@ public class ConstantUtil {
      * 消息状态：删除
      */
     public static final int Message_DELETE = 2;
+    /**
+     * 通知类型：点赞
+     */
+
+    public static final int NOTICE_LIKE = 0;
+
+    /**
+     * 通知类型：评论
+     */
+    public static final int NOTICE_COMMENT = 1;
+
+    /**
+     * 通知类型：关注
+     */
+    public static final int NOTICE_FOLLOW = 2;
 }
